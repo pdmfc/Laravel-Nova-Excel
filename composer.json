@@ -19,7 +19,7 @@
   "require": {
     "php": ">=7.1.0",
     "laravel/nova": "*",
-    "maatwebsite/excel": "^3.1"
+    "maatwebsite/excel": "^3.1|dev-master"
   },
   "autoload": {
     "psr-4": {
