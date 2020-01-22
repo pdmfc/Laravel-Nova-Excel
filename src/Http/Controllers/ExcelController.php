@@ -13,28 +13,28 @@ class ExcelController extends Controller
     use ValidatesRequests;
 
     /**
-     * @param Request         $request
+     * @param Request $request
      * @param ResponseFactory $response
      *
      * @return BinaryFileResponse
      */
     public function download(Request $request, ResponseFactory $response): BinaryFileResponse
     {
-        if(!$this->canAccess($request)) {
+        if (!$this->canAccess($request)) {
             abort(404);
         }
 
         $data = $this->validate($request, [
-            'path'     => 'required',
+            'path' => 'required',
             'filename' => 'required',
         ]);
 
-        try{
+        try {
             $download = $response->download(
                 $data['path'],
                 $data['filename']
             )->deleteFileAfterSend($shouldDelete = true);
-        }catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             abort(403);
         }
         return $download;
@@ -46,16 +46,16 @@ class ExcelController extends Controller
      * @param Request $request
      * @return boolean
      */
-    protected function canAccess(Request $request):bool
+    protected function canAccess(Request $request): bool
     {
         $canAccess = true;
         $pathInfo = pathinfo($request->input('filename'));
 
-        if(!$this->validadePath($request->input('path'))) {
+        if (!$this->validatePath($request->input('path'))) {
             $canAccess = false;
         }
-        if($canAccess) {
-            if(!$this->checkFileExtension($pathInfo['extension'])) {
+        if ($canAccess) {
+            if (!$this->checkFileExtension($pathInfo['extension'])) {
                 $canAccess = false;
             }
         }
@@ -68,11 +68,11 @@ class ExcelController extends Controller
      * @param string $fileExtension
      * @return boolean
      */
-    protected function checkFileExtension(string $fileExtension):bool
+    protected function checkFileExtension(string $fileExtension): bool
     {
         $isValid = true;
         $validFileExtensions = ['csv', 'xlsx', 'xls'];
-        if(!in_array($fileExtension, $validFileExtensions)) {
+        if (!in_array($fileExtension, $validFileExtensions)) {
             $isValid = false;
         }
         return $isValid;
@@ -84,14 +84,14 @@ class ExcelController extends Controller
      * @param string $path
      * @return boolean
      */
-    protected function validadePath(string $path):bool
+    protected function validatePath(string $path): bool
     {
         $isValid = false;
         $strRealPath = realpath($path);
 
-        if (strpos($strRealPath, base_path().'/storage') === 0) {
+        if (strpos($strRealPath, env('LARAVEL_EXCEL_CUSTOM_DOWNLOAD_PATH', base_path() . '/storage')) === 0) {
             $isValid = true;
         }
-        return  $isValid;
+        return $isValid;
     }
 }
